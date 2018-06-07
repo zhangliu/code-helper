@@ -11,14 +11,15 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "onCommand:ch.toRun"
     ],
     "main": "./out/extension",
     "contributes": {
-        "commands": [
+        "keybindings": [
             {
-                "command": "extension.sayHello",
-                "title": "Hello World"
+                "command": "ch.toRun",
+                "key": "ctrl+g",
+                "mac": "cmd+g"
             }
         ]
     },
