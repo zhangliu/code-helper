@@ -2,18 +2,21 @@ import * as Sqlite3 from 'better-sqlite3';
 import * as fs from 'fs';
 
 const dbPath = `${__dirname}/../../db/cmd.db`;
-const dbName = 'smart_cmd';
+const tableName = 'smart_cmd';
 const createDbSql = `
-CREATE TABLE ${dbName}(
-   id INT PRIMARY KEY     NOT NULL,
-   next           INT    NOT NULL,
-   cmd            TEXT   NOT NULL,
-   extendInfo     TEXT
+CREATE TABLE ${tableName}(
+   id INTEGER PRIMARY KEY        AUTOINCREMENT,
+   next               INT        NOT NULL,
+   cmd                TEXT       NOT NULL,
+   context            CHAR(50)   NOT NULL,
+   extendInfo         TEXT
 );
 `;
+
+const insertSql = `INSERT INTO ${tableName}(next, cmd, context, extendInfo) VALUES (?, ?, ?, ?)`;
 let sltDb: any;
 
-const getDb = async (): Promise<any> => {
+const getDb = (): Sqlite3 => {
   if (sltDb) {
     return sltDb;
   }
@@ -26,15 +29,26 @@ const getDb = async (): Promise<any> => {
   return sltDb;
 };
 
-const get = async (query: any) => {
-  try {
-    const db = await getDb();
-    return db;
-  } catch (err) {
-    console.log(err);
-  }
+const get = (cmd: string) => {
+  const db = getDb();
+  const data = db.prepare(`SELECT * from ${tableName} where cmd=? and next=0`).all(cmd);
+  return data;
+};
+
+const add = (cmd: string) => {
+  const db = getDb();
+  const result = db.prepare(insertSql).run([0, cmd, '', '']);
+  return result.lastInsertROWID;
+};
+
+const map = (cmd1: string, cmd2: string) => {
+  const db = getDb();
+  const data = db.prepare(`SELECT * from ${tableName} where cmd=?`).get(cmd2);
+  return data;
 };
 
 export {
-  get
+  get,
+  add,
+  map
 };
